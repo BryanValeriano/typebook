@@ -1,5 +1,6 @@
 'use client';
 import ProgressBar from '@/components/ProgressBar';
+import TypingText from '@/components/TypingText';
 import { fetchBook } from '@/services/fetchBook';
 import { useState, useEffect } from 'react';
 
@@ -78,21 +79,7 @@ export default function Home() {
           <h1 className="text-2xl font-bold mb-8">Typing Speed Test</h1>
 
           <ProgressBar overallProgress={overallProgress} />
-
-          {/* Display area for text */}
-          <div className="text-xl font-mono whitespace-pre-wrap break-words max-w-2xl">
-            {targetText.split('').map((char, index) => (
-              <span key={index}
-                className={`
-                  ${index === currentPos ? 'border-b-2 border-white' : ''}
-                  ${index < currentPos ?
-                    (mistakes[index] ? 'text-red-500' : 'text-gray-500')
-                    : 'text-white'}
-                `}>
-                {char}
-              </span>
-            ))}
-          </div>
+          <TypingText targetText={targetText} currentPos={currentPos} mistakes={mistakes} />
 
           {/* Hidden textarea for capturing input */}
           <textarea
