@@ -22,8 +22,12 @@ export default function Home() {
   const [overallProgress, setOverallProgress] = useState(0);
   // Track whether the textarea is focused
   const [isFocused, setIsFocused] = useState(true);
+  // Track whether to show the cursor flash
+  const [cursorFlash, setCursorFlash] = useState(false);
   // We'll also store a ref to the hidden textarea so we can programmatically focus it
   const hiddenTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+  // This ref holds the current timeout ID
+  const flashTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 
   // Fetch and prepare text chunks
@@ -54,6 +58,17 @@ export default function Home() {
       const normalizedTargetChar = targetText[currentPos].normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
       if (normalizedTypedKey.toLowerCase() === normalizedTargetChar.toLowerCase()) {
+        // Clear existing timeout
+        if (flashTimeoutRef.current) {
+          clearTimeout(flashTimeoutRef.current);
+        }
+        // Trigger a brief "flash" so the cursor is fully visible
+        setCursorFlash(true);
+        // Start a new timer
+        flashTimeoutRef.current = setTimeout(() => {
+          setCursorFlash(false);
+        }, 800);
+
         // Correct key pressed
         if (currentPos < targetText.length - 1) {
           // Move to next character
@@ -115,6 +130,7 @@ export default function Home() {
             currentPos={currentPos}
             mistakes={mistakes}
             isFocused={isFocused}
+            cursorFlash={cursorFlash}
           />
           <HiddenTextarea
             textareaRef={hiddenTextareaRef as React.RefObject<HTMLTextAreaElement>}

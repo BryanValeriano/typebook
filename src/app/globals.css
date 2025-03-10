@@ -36,12 +36,18 @@ body {
     vertical-align: text-bottom;
   }
 
+  .cursor-flash::before {
+    /* override blink-cursor's animation */
+    animation: none;
+    opacity: 1 !important; 
+  }
+
   @keyframes blink-cursor {
     0%, 100% {
       opacity: 1; /* fully visible */
     }
     50% {
-      opacity: 0.9; /* partially visible, but not zero */
+      opacity: 0.3; /* partially visible, but not zero */
     }
   }
 }

@@ -5,6 +5,7 @@ type TypingTextProps = {
   currentPos: number;
   mistakes: boolean[];
   isFocused: boolean;
+  cursorFlash: boolean;
 };
 
 export default function TypingText({
@@ -12,6 +13,7 @@ export default function TypingText({
   currentPos,
   mistakes,
   isFocused,
+  cursorFlash
 }: TypingTextProps) {
   return (
     <div className="text-xl font-mono whitespace-pre-wrap break-words max-w-2xl">
@@ -23,7 +25,8 @@ export default function TypingText({
         // Add "blinking-cursor" only if it's the current character and we are focused
         const classes = [
           isCurrent && isFocused ? 'blinking-cursor' : '',
-          isPast ? (isMistake ? 'text-red-500' : 'text-gray-500') : 'text-white'
+          isPast ? (isMistake ? 'text-red-500' : 'text-gray-500') : 'text-white',
+          isCurrent && cursorFlash ? 'cursor-flash' : ''
         ];
 
         return (
