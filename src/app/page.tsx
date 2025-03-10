@@ -1,101 +1,134 @@
-import Image from "next/image";
+'use client';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  // Text chunks from the book
+  const [textChunks, setTextChunks] = useState<string[]>([]);
+  // Current chunk index
+  const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
+  // Current text to type
+  const [targetText, setTargetText] = useState('');
+  // Current position in the text
+  const [currentPos, setCurrentPos] = useState(0);
+  // Track which characters were typed incorrectly
+  const [mistakes, setMistakes] = useState<boolean[]>([]);
+  // Track if current character has been mistyped
+  const [currentMistake, setCurrentMistake] = useState(false);
+  // Overall progress
+  const [overallProgress, setOverallProgress] = useState(0);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // Fetch and prepare text chunks
+  useEffect(() => {
+    async function fetchBookText() {
+      try {
+        const response = await fetch('/brascubas.txt');
+        const fullText = await response.text();
+
+        // Split text into chunks of about 100 words
+        const chunks = fullText
+          .split(/\s+/)
+          .reduce((resultArray, item, index) => {
+            const chunkIndex = Math.floor(index / 100);
+
+            if (!resultArray[chunkIndex]) {
+              resultArray[chunkIndex] = [];
+            }
+
+            resultArray[chunkIndex].push(item);
+
+            return resultArray;
+          }, [] as string[][])
+          .map(chunk => chunk.join(' '));
+
+        setTextChunks(chunks);
+        setTargetText(chunks[0]);
+      } catch (error) {
+        console.error('Failed to fetch book text', error);
+        setTargetText("Failed to load text. Please try again.");
+      }
+    }
+
+    fetchBookText();
+  }, []);
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    // Only handle printable characters
+    if (e.key.length === 1) {
+      // Normalize both the typed key and the target character to handle accents
+      const normalizedTypedKey = e.key.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const normalizedTargetChar = targetText[currentPos].normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+      if (normalizedTypedKey.toLowerCase() === normalizedTargetChar.toLowerCase()) {
+        // Correct key pressed
+        if (currentPos < targetText.length - 1) {
+          // Move to next character
+          setMistakes(prev => [...prev, currentMistake]);
+          setCurrentPos(prev => prev + 1);
+          setCurrentMistake(false);
+        } else {
+          // Reached end of current chunk
+          if (currentChunkIndex < textChunks.length - 1) {
+            const nextChunkIndex = currentChunkIndex + 1;
+            setCurrentChunkIndex(nextChunkIndex);
+            setTargetText(textChunks[nextChunkIndex]);
+            setCurrentPos(0);
+            setMistakes([]);
+            setCurrentMistake(false);
+
+            // Calculate overall progress
+            const progress = ((nextChunkIndex + 1) / textChunks.length) * 100;
+            setOverallProgress(Math.round(progress));
+          }
+        }
+      } else {
+        // Wrong key pressed
+        setCurrentMistake(true);
+      }
+    }
+  };
+
+  return (
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 bg-black text-white">
+      <main className="flex flex-col gap-8 row-start-2 items-center">
+        <div className="flex flex-col gap-8 items-center">
+          <h1 className="text-2xl font-bold mb-8">Typing Speed Test</h1>
+
+          {/* Progress Bar */}
+          <div className="w-full bg-gray-700 h-2 mb-4">
+            <div
+              className="bg-green-500 h-2"
+              style={{ width: `${overallProgress}%` }}
+            ></div>
+          </div>
+
+          {/* Display area for text */}
+          <div className="text-xl font-mono whitespace-pre-wrap break-words max-w-2xl">
+            {targetText.split('').map((char, index) => (
+              <span key={index}
+                className={`
+                  ${index === currentPos ? 'border-b-2 border-white' : ''}
+                  ${index < currentPos ?
+                    (mistakes[index] ? 'text-red-500' : 'text-gray-500')
+                    : 'text-white'}
+                `}>
+                {char}
+              </span>
+            ))}
+          </div>
+
+          {/* Hidden textarea for capturing input */}
+          <textarea
+            className="opacity-0 h-1 w-1 absolute"
+            autoFocus
+            onKeyDown={handleKeyPress}
+          />
+
+          {/* Progress Text */}
+          <div className="text-sm text-gray-400">
+            Progress: {overallProgress}% ({currentChunkIndex + 1}/{textChunks.length} chunks)
+          </div>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
