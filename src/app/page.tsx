@@ -1,5 +1,6 @@
 'use client';
 import ProgressBar from '@/components/ProgressBar';
+import { fetchBook } from '@/services/fetchBook';
 import { useState, useEffect } from 'react';
 
 export default function Home() {
@@ -20,36 +21,18 @@ export default function Home() {
 
   // Fetch and prepare text chunks
   useEffect(() => {
-    async function fetchBookText() {
-      try {
-        const response = await fetch('/brascubas.txt');
-        const fullText = await response.text();
+    async function loadBook() {
+      const chunks = await fetchBook();
 
-        // Split text into chunks of about 100 words
-        const chunks = fullText
-          .split(/\s+/)
-          .reduce((resultArray, item, index) => {
-            const chunkIndex = Math.floor(index / 100);
-
-            if (!resultArray[chunkIndex]) {
-              resultArray[chunkIndex] = [];
-            }
-
-            resultArray[chunkIndex].push(item);
-
-            return resultArray;
-          }, [] as string[][])
-          .map(chunk => chunk.join(' '));
-
+      if (!chunks.length) {
+        setTargetText("Failed to load text. Please try again.");
+      } else {
         setTextChunks(chunks);
         setTargetText(chunks[0]);
-      } catch (error) {
-        console.error('Failed to fetch book text', error);
-        setTargetText("Failed to load text. Please try again.");
       }
     }
 
-    fetchBookText();
+    loadBook();
   }, []);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
