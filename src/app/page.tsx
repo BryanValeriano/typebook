@@ -1,4 +1,5 @@
 'use client';
+import ProgressBar from '@/components/ProgressBar';
 import { useState, useEffect } from 'react';
 
 export default function Home() {
@@ -93,13 +94,7 @@ export default function Home() {
         <div className="flex flex-col gap-8 items-center">
           <h1 className="text-2xl font-bold mb-8">Typing Speed Test</h1>
 
-          {/* Progress Bar */}
-          <div className="w-full bg-gray-700 h-2 mb-4">
-            <div
-              className="bg-green-500 h-2"
-              style={{ width: `${overallProgress}%` }}
-            ></div>
-          </div>
+          <ProgressBar overallProgress={overallProgress} />
 
           {/* Display area for text */}
           <div className="text-xl font-mono whitespace-pre-wrap break-words max-w-2xl">
