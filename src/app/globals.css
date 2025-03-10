@@ -19,3 +19,33 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@layer utilities {
+  .blinking-cursor::before {
+    content: "";
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin-right: 2px;
+
+    /* This is your gold/yellow cursor color */
+    background-color: #FFD700;
+
+    /* Keep blinking but never go fully off */
+    animation: blink-cursor 1s step-start infinite;
+    vertical-align: text-bottom;
+  }
+
+  @keyframes blink-cursor {
+    0%, 100% {
+      opacity: 1; /* fully visible */
+    }
+    50% {
+      opacity: 0.9; /* partially visible, but not zero */
+    }
+  }
+}
+
+
+
+

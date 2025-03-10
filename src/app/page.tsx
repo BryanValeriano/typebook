@@ -3,7 +3,7 @@ import HiddenTextarea from '@/components/HiddenTextarea';
 import ProgressBar from '@/components/ProgressBar';
 import TypingText from '@/components/TypingText';
 import { fetchBook } from '@/services/fetchBook';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function Home() {
   // Text chunks from the book
@@ -20,6 +20,11 @@ export default function Home() {
   const [currentMistake, setCurrentMistake] = useState(false);
   // Overall progress
   const [overallProgress, setOverallProgress] = useState(0);
+  // Track whether the textarea is focused
+  const [isFocused, setIsFocused] = useState(true);
+  // We'll also store a ref to the hidden textarea so we can programmatically focus it
+  const hiddenTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+
 
   // Fetch and prepare text chunks
   useEffect(() => {
@@ -38,6 +43,10 @@ export default function Home() {
   }, []);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (!isFocused) {
+      setIsFocused(true);
+      hiddenTextareaRef.current?.focus();
+    }
     // Only handle printable characters
     if (e.key.length === 1) {
       // Normalize both the typed key and the target character to handle accents
@@ -72,21 +81,50 @@ export default function Home() {
       }
     }
   };
+  const handleFocusChange = (focused: boolean) => {
+    setIsFocused(focused);
+  };
+
+  // If user clicks or presses any key on the overlay, re-focus the textarea
+  const handleOverlayClick = () => {
+    setIsFocused(true);
+    hiddenTextareaRef.current?.focus();
+  };
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 bg-black text-white">
       <main className="flex flex-col gap-8 row-start-2 items-center">
+        {/* If not focused, show overlay */}
+        {!isFocused && (
+          <div
+            className="absolute top-0 left-0 w-full h-full flex items-center justify-center
+                     bg-black bg-opacity-70 text-white z-50 cursor-pointer"
+            onClick={handleOverlayClick}
+          >
+            <p className="text-lg font-semibold text-center px-4">
+              Click here or press any key to focus
+            </p>
+          </div>
+        )}
         <div className="flex flex-col gap-8 items-center">
           <h1 className="text-2xl font-bold mb-8">Typing Speed Test</h1>
 
           <ProgressBar overallProgress={overallProgress} />
-          <TypingText targetText={targetText} currentPos={currentPos} mistakes={mistakes} />
-          <HiddenTextarea handleKeyDown={handleKeyPress} />
-
-          {/* Progress Text */}
+          <TypingText
+            targetText={targetText}
+            currentPos={currentPos}
+            mistakes={mistakes}
+            isFocused={isFocused}
+          />
+          <HiddenTextarea
+            textareaRef={hiddenTextareaRef as React.RefObject<HTMLTextAreaElement>}
+            handleKeyDown={handleKeyPress}
+            onFocusChange={handleFocusChange}
+          />
           <div className="text-sm text-gray-400">
             Progress: {overallProgress}% ({currentChunkIndex + 1}/{textChunks.length} chunks)
           </div>
+
         </div>
       </main>
     </div>
