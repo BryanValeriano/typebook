@@ -1,4 +1,5 @@
 'use client';
+import HiddenTextarea from '@/components/HiddenTextarea';
 import ProgressBar from '@/components/ProgressBar';
 import TypingText from '@/components/TypingText';
 import { fetchBook } from '@/services/fetchBook';
@@ -80,13 +81,7 @@ export default function Home() {
 
           <ProgressBar overallProgress={overallProgress} />
           <TypingText targetText={targetText} currentPos={currentPos} mistakes={mistakes} />
-
-          {/* Hidden textarea for capturing input */}
-          <textarea
-            className="opacity-0 h-1 w-1 absolute"
-            autoFocus
-            onKeyDown={handleKeyPress}
-          />
+          <HiddenTextarea handleKeyDown={handleKeyPress} />
 
           {/* Progress Text */}
           <div className="text-sm text-gray-400">
