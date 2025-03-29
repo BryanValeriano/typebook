@@ -2,7 +2,9 @@
 import HiddenTextarea from '@/components/HiddenTextarea';
 import ProgressBar from '@/components/ProgressBar';
 import TypingText from '@/components/TypingText';
+import LibraryView from '@/components/LibraryView';
 import { fetchBook } from '@/services/fetchBook';
+import { listAvailableBooks } from '@/services/bookService';
 import { useState, useEffect, useRef } from 'react';
 
 export default function Home() {
@@ -29,22 +31,62 @@ export default function Home() {
   // This ref holds the current timeout ID
   const flashTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // New state for library view
+  const [isLibraryView, setIsLibraryView] = useState(true);
+  const [availableBooks, setAvailableBooks] = useState<string[]>([]);
+  const [fullLibraryView, setFullLibraryView] = useState(false);
+
+
+  // Fetch available books
+  useEffect(() => {
+    async function loadAvailableBooks() {
+      const books = await listAvailableBooks();
+      setAvailableBooks(books);
+    }
+
+    loadAvailableBooks();
+  }, []);
 
   // Fetch and prepare text chunks
-  useEffect(() => {
-    async function loadBook() {
-      const chunks = await fetchBook();
+  const loadSelectedBook = async (bookName: string) => {
+    try {
+      const chunks = await fetchBook(bookName);
 
       if (!chunks.length) {
         setTargetText("Failed to load text. Please try again.");
       } else {
         setTextChunks(chunks);
         setTargetText(chunks[0]);
+        setIsLibraryView(false);
       }
+    } catch (error) {
+      console.error('Error loading book:', error);
+      setTargetText("Failed to load text. Please try again.");
     }
+  };
 
-    loadBook();
-  }, []);
+  // Method to return to library
+  const returnToLibrary = () => {
+    console.log("teste")
+    // Reset all typing-related states
+    setTextChunks([]);
+    setCurrentChunkIndex(0);
+    setTargetText('');
+    setCurrentPos(0);
+    setMistakes([]);
+    setCurrentMistake(false);
+    setOverallProgress(0);
+    setIsFocused(true);
+
+    // Return to library view
+    setIsLibraryView(true);
+    setFullLibraryView(false);
+
+    // Ensure textarea is unfocused
+    if (hiddenTextareaRef.current) {
+      hiddenTextareaRef.current.blur();
+    }
+  };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (!isFocused) {
@@ -107,42 +149,69 @@ export default function Home() {
   };
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 bg-black text-white">
-      <main className="flex flex-col gap-8 row-start-2 items-center">
-        {/* If not focused, show overlay */}
-        {!isFocused && (
-          <div
-            className="absolute top-0 left-0 w-full h-full flex items-center justify-center
-                     bg-black bg-opacity-70 text-white z-50 cursor-pointer"
-            onClick={handleOverlayClick}
+    <div className="grid grid-rows-[auto_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 bg-black text-white">
+      {/* Global Header with Library Button */}
+      <header className="w-full flex justify-between items-center row-start-1 mb-4">
+        {!isLibraryView && (
+          <button
+            onClick={returnToLibrary}
+            className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg"
           >
-            <p className="text-lg font-semibold text-center px-4">
-              Click here or press any key to focus
-            </p>
+            Back to Library
+          </button>
+        )}
+      </header>
+
+      <main className="flex flex-col gap-8 row-start-2 items-center w-full">
+        {isLibraryView ? (
+          <LibraryView
+            books={fullLibraryView ? availableBooks : availableBooks.slice(0, 5)}
+            onBookSelect={loadSelectedBook}
+            onViewAll={() => setFullLibraryView(true)}
+          />
+        ) : (
+          <div className="relative w-full max-w-2xl">
+            {/* Typing Area Container */}
+            <div className="relative">
+              {/* Focus Overlay */}
+              {!isFocused && (
+                <div
+                  className="absolute top-0 left-0 w-full h-full flex items-center justify-center
+                           bg-black bg-opacity-70 text-white z-50 cursor-pointer"
+                  onClick={handleOverlayClick}
+                >
+                  <p className="text-lg font-semibold text-center px-4">
+                    Click here or press any key to focus
+                  </p>
+                </div>
+              )}
+
+              {/* Typing Content */}
+              <div className="flex flex-col gap-8 items-center">
+                <h1 className="text-2xl font-bold mb-8">Typing Speed Test</h1>
+
+                <ProgressBar overallProgress={overallProgress} />
+                <TypingText
+                  targetText={targetText}
+                  currentPos={currentPos}
+                  mistakes={mistakes}
+                  isFocused={isFocused}
+                  cursorFlash={cursorFlash}
+                />
+                <HiddenTextarea
+                  textareaRef={hiddenTextareaRef as React.RefObject<HTMLTextAreaElement>}
+                  handleKeyDown={handleKeyPress}
+                  onFocusChange={handleFocusChange}
+                />
+                <div className="text-sm text-gray-400">
+                  Progress: {overallProgress}% ({currentChunkIndex + 1}/{textChunks.length} chunks)
+                </div>
+              </div>
+            </div>
           </div>
         )}
-        <div className="flex flex-col gap-8 items-center">
-          <h1 className="text-2xl font-bold mb-8">Typing Speed Test</h1>
-
-          <ProgressBar overallProgress={overallProgress} />
-          <TypingText
-            targetText={targetText}
-            currentPos={currentPos}
-            mistakes={mistakes}
-            isFocused={isFocused}
-            cursorFlash={cursorFlash}
-          />
-          <HiddenTextarea
-            textareaRef={hiddenTextareaRef as React.RefObject<HTMLTextAreaElement>}
-            handleKeyDown={handleKeyPress}
-            onFocusChange={handleFocusChange}
-          />
-          <div className="text-sm text-gray-400">
-            Progress: {overallProgress}% ({currentChunkIndex + 1}/{textChunks.length} chunks)
-          </div>
-
-        </div>
       </main>
     </div>
   );
+
 }

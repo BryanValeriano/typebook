@@ -1,8 +1,7 @@
-export async function fetchBook(): Promise<string[]> {
+export async function fetchBook(bookname: string): Promise<string[]> {
   try {
-    const response = await fetch('/brascubas.txt');
+    const response = await fetch(`/books/${bookname}.txt`);
     const fullText = await response.text();
-
     // Split text into chunks of ~100 words
     const chunks = fullText
       .split(/\s+/)
@@ -15,7 +14,6 @@ export async function fetchBook(): Promise<string[]> {
         return resultArray;
       }, [] as string[][])
       .map(chunk => chunk.join(' '));
-
     return chunks;
   } catch (error) {
     console.error('Failed to fetch book text', error);
