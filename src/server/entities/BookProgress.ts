@@ -12,7 +12,6 @@ export default class BookProgress {
   public id: string;
   public userID: number;
   public bookID: number;
-  public bookProgressName: string;
   public currentChunkIndex: number;
   public totalTypedCharacters: number;
   public totalMistakes: number;
@@ -23,7 +22,6 @@ export default class BookProgress {
     this.id = bookProgress.id;
     this.userID = bookProgress.userID;
     this.bookID = bookProgress.bookID;
-    this.bookProgressName = bookProgress.id;
     this.currentChunkIndex = bookProgress.currentChunkIndex;
     this.totalTypedCharacters = bookProgress.totalTypedCharacters;
     this.totalMistakes = bookProgress.totalMistakes;
