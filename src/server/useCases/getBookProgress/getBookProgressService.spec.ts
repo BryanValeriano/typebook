@@ -13,7 +13,6 @@ describe("Get Book Progress By UserID and BookID", () => {
       bookProgressRepository,
     });
 
-
     const userID = 2;
     const bookID = 3;
     const currentChunkIndex = 2;
