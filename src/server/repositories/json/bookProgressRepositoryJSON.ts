@@ -18,6 +18,19 @@ export default class BookProgressRepositoryJSON implements IBookProgressReposito
     this.getBookProgressFromFile();
   }
 
+  private async saveToFile(): Promise<void> {
+    fs.writeFile(this.filePath, JSON.stringify(this.db), (err) => {
+      if (err) {
+        console.error(`Error writing to file ${this.filePath}:`, err);
+      }
+    });
+  }
+
+  public async saveBookProgress(bookProgress: BookProgress): Promise<void> {
+    this.db.push(bookProgress);
+    await this.saveToFile();
+  }
+
   public async getProgressByUserAndBookIDs(userID: number, bookID: number): Promise<BookProgress | null> {
     return this.db.find(bookProgress => bookProgress.userID === userID && bookProgress.bookID === bookID) || null;
   }

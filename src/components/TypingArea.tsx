@@ -1,5 +1,4 @@
 // 	Self-contained full typing experience (text to type, progress, mistakes, flashing cursor, handling focus)
-// TypingArea.tsx
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import TypingText from './TypingText';
@@ -117,4 +116,3 @@ export default function TypingArea({ textChunks, onComplete }: TypingAreaProps) 
     </div>
   );
 }
-
