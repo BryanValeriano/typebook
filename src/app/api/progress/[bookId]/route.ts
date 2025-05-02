@@ -7,7 +7,12 @@ export async function GET(request: NextRequest, { params }: { params: { bookId: 
   try {
     const { bookProgressRepository } = container();
     const getBookProgressController = new GetBookProgressController({ bookProgressRepository });
-    const userID = "3";
+
+    const userID = request.headers.get("x-user-id");
+    if (!userID) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
     const response = await getBookProgressController.handle(
       parseInt(userID),
       parseInt(params.bookId),
@@ -27,6 +32,12 @@ export async function PATCH(request: NextRequest, context: { params: { bookId: s
 
     const body = await request.json();
     const bookID = parseInt(context.params.bookId);
+
+    const userID = request.headers.get("x-user-id");
+    if (!userID) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    body.userID = parseInt(userID);
 
     const response = await saveBookProgressController.handle({
       ...body,
