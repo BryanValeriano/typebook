@@ -8,7 +8,6 @@ export async function GET(request: NextRequest, { params }: { params: { bookId: 
     const { bookProgressRepository } = container();
     const getBookProgressController = new GetBookProgressController({ bookProgressRepository });
     const userID = "3";
-
     const response = await getBookProgressController.handle(
       parseInt(userID),
       parseInt(params.bookId),

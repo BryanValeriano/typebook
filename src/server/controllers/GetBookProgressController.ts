@@ -1,3 +1,4 @@
+import { z } from "zod";
 import BookProgress from "../entities/BookProgress";
 import IBookProgressRepository from "../repositories/IBookProgressRepository";
 import GetBookProgressService from "../useCases/getBookProgress/getBookProgressService";
@@ -9,6 +10,10 @@ type GetBookProgressControllerProps = {
 export default class GetBookProgressController {
   private bookProgressRepository: IBookProgressRepository;
   private getBookProgressService: GetBookProgressService;
+  private requestBodySchema = z.object({
+    userID: z.number(),
+    bookID: z.number(),
+  });
 
   constructor({ bookProgressRepository }: GetBookProgressControllerProps) {
     this.bookProgressRepository = bookProgressRepository;
@@ -18,6 +23,10 @@ export default class GetBookProgressController {
   }
 
   public async handle(userID: number, bookID: number): Promise<BookProgress | void> {
+    const parsedInput = this.requestBodySchema.safeParse({ userID, bookID });
+    if (!parsedInput.success) {
+      throw new Error("Invalid input: ", parsedInput.error);
+    }
     return await this.getBookProgressService.execute(userID, bookID);
   }
 }
