@@ -15,7 +15,7 @@ export default class SaveBookProgressService {
   }
 
   public async execute({ userID, bookID, currentChunkIndex, totalTypedCharacters, totalMistakes }: Input): Promise<BookProgress> {
-    const id = `${userID}-${bookID}}`;
+    const id = `${userID}-${bookID}`;
     const bookProgress = new BookProgress({
       id: id,
       userID,

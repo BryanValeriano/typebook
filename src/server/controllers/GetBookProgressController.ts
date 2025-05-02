@@ -17,7 +17,7 @@ export default class GetBookProgressController {
     });
   }
 
-  public async execute(userID: number, bookID: number): Promise<BookProgress | void> {
+  public async handle(userID: number, bookID: number): Promise<BookProgress | void> {
     return await this.getBookProgressService.execute(userID, bookID);
   }
 }
