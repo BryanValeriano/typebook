@@ -1,4 +1,5 @@
 import IBookProgressRepository from "./repositories/IBookProgressRepository";
+import BookProgressRepositoryInMemory from "./repositories/in-memrory/bookProgressRepositoryInMemory";
 import BookProgressRepositoryJSON from "./repositories/json/bookProgressRepositoryJSON";
 
 interface Container {
@@ -10,8 +11,7 @@ const dev: Container = {
 }
 
 const test: Container = {
-  // TODO inmemory database
-  bookProgressRepository: new BookProgressRepositoryJSON(),
+  bookProgressRepository: new BookProgressRepositoryInMemory(),
 }
 
 export function container(): Container {
