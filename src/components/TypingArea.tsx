@@ -1,5 +1,5 @@
-// 	Self-contained full typing experience (text to type, progress, mistakes, flashing cursor, handling focus)
 'use client';
+
 import { useState, useEffect, useRef } from 'react';
 import TypingText from './TypingText';
 import HiddenTextarea from './HiddenTextarea';
@@ -7,11 +7,22 @@ import ProgressBar from './ProgressBar';
 
 interface TypingAreaProps {
   textChunks: string[];
+  bookId: string;
+  initialChunkIndex?: number;
+  totalCharacters?: number;
+  totalMistakes?: number;
   onComplete?: () => void;
 }
 
-export default function TypingArea({ textChunks, onComplete }: TypingAreaProps) {
-  const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
+export default function TypingArea({
+  textChunks,
+  bookId,
+  initialChunkIndex = 0,
+  totalCharacters = 0,
+  totalMistakes = 0,
+  onComplete,
+}: TypingAreaProps) {
+  const [currentChunkIndex, setCurrentChunkIndex] = useState(initialChunkIndex);
   const [targetText, setTargetText] = useState('');
   const [currentPos, setCurrentPos] = useState(0);
   const [mistakes, setMistakes] = useState<boolean[]>([]);
@@ -20,14 +31,17 @@ export default function TypingArea({ textChunks, onComplete }: TypingAreaProps) 
   const [isFocused, setIsFocused] = useState(true);
   const [cursorFlash, setCursorFlash] = useState(false);
 
+  const [cumulativeCharacters, setCumulativeCharacters] = useState(totalCharacters);
+  const [cumulativeMistakes, setCumulativeMistakes] = useState(totalMistakes);
+
   const hiddenTextareaRef = useRef<HTMLTextAreaElement | null>(null);
   const flashTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (textChunks.length > 0) {
-      setTargetText(textChunks[0]);
+      setTargetText(textChunks[currentChunkIndex]);
     }
-  }, [textChunks]);
+  }, [textChunks, currentChunkIndex]);
 
   useEffect(() => {
     return () => {
@@ -55,16 +69,35 @@ export default function TypingArea({ textChunks, onComplete }: TypingAreaProps) 
           setCurrentPos(prev => prev + 1);
           setCurrentMistake(false);
         } else {
-          if (currentChunkIndex < textChunks.length - 1) {
-            const nextChunkIndex = currentChunkIndex + 1;
+          const nextChunkIndex = currentChunkIndex + 1;
+          const charsTyped = targetText.length;
+          const mistakesCount = mistakes.filter(Boolean).length + (currentMistake ? 1 : 0);
+
+          const updatedCharacters = cumulativeCharacters + charsTyped;
+          const updatedMistakes = cumulativeMistakes + mistakesCount;
+
+          if (nextChunkIndex < textChunks.length) {
             setCurrentChunkIndex(nextChunkIndex);
-            setTargetText(textChunks[nextChunkIndex]);
             setCurrentPos(0);
             setMistakes([]);
             setCurrentMistake(false);
 
+            setCumulativeCharacters(updatedCharacters);
+            setCumulativeMistakes(updatedMistakes);
+
             const progress = ((nextChunkIndex + 1) / textChunks.length) * 100;
             setOverallProgress(Math.round(progress));
+
+            // Save progress
+            fetch(`/api/progress/${bookId}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                currentChunkIndex: nextChunkIndex,
+                totalCharacters: updatedCharacters,
+                totalMistakes: updatedMistakes,
+              }),
+            });
           } else {
             onComplete?.();
           }
@@ -97,6 +130,7 @@ export default function TypingArea({ textChunks, onComplete }: TypingAreaProps) 
         <h1 className="text-2xl font-bold mb-8">Typing Speed Test</h1>
 
         <ProgressBar overallProgress={overallProgress} />
+
         <TypingText
           targetText={targetText}
           currentPos={currentPos}
@@ -104,11 +138,13 @@ export default function TypingArea({ textChunks, onComplete }: TypingAreaProps) 
           isFocused={isFocused}
           cursorFlash={cursorFlash}
         />
+
         <HiddenTextarea
-          textareaRef={hiddenTextareaRef as React.RefObject<HTMLTextAreaElement>}
+          textareaRef={hiddenTextareaRef}
           handleKeyDown={handleKeyPress}
           onFocusChange={setIsFocused}
         />
+
         <div className="text-sm text-gray-400">
           Progress: {overallProgress}% ({currentChunkIndex + 1}/{textChunks.length} chunks)
         </div>
@@ -116,3 +152,4 @@ export default function TypingArea({ textChunks, onComplete }: TypingAreaProps) 
     </div>
   );
 }
+
