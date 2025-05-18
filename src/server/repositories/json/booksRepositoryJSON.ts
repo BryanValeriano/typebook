@@ -1,17 +1,17 @@
-import BookProgress from "@/server/entities/BookProgress";
-import IBookProgressRepository from "../IBookProgressRepository";
+import Book from "@/server/entities/Book";
+import IBooksRepository from "../IBooksRepository";
 import path from "path";
 import fs from "fs/promises";
 
-export default class BookProgressRepositoryJSON implements IBookProgressRepository {
-  private db: BookProgress[] = [];
+export default class BooksRepositoryJSON implements IBooksRepository {
+  private db: Book[] = [];
   private filePath = path.join(
     "src",
     "server",
     "repositories",
     "json",
     "files",
-    "bookProgress.json",
+    "books.json",
   )
 
   constructor() {
@@ -21,6 +21,7 @@ export default class BookProgressRepositoryJSON implements IBookProgressReposito
     });
   }
 
+
   private async saveToFile(): Promise<void> {
     fs.writeFile(this.filePath, JSON.stringify(this.db))
       .catch(err => {
@@ -28,20 +29,28 @@ export default class BookProgressRepositoryJSON implements IBookProgressReposito
       });
   }
 
-  public async saveBookProgress(bookProgress: BookProgress): Promise<void> {
-    this.db.push(bookProgress);
+  public async getAllBooks(): Promise<Book[]> {
+    return this.db;
+  }
+
+  public async getBookById(bookId: string): Promise<Book | void> {
+    return this.db.find(book => book.id === bookId);
+  }
+
+  public async saveBook(book: Book): Promise<void> {
+    this.db.push(book);
     await this.saveToFile();
   }
 
-  public async getProgressByUserAndBookIDs(userID: number, bookID: number): Promise<BookProgress | void> {
-    return this.db.find(bookProgress => bookProgress.userID === userID && bookProgress.bookID === bookID);
+  public async deleteBook(bookId: string): Promise<void> {
+    this.db = this.db.filter(book => book.id !== bookId);
   }
 
-  public async getDataFromFile(): Promise<BookProgress[]> {
+  public async getDataFromFile(): Promise<Book[]> {
     try {
       const data = await fs.readFile(this.filePath, "utf-8");
       const parsed = JSON.parse(data);
-      return parsed.map((bookProgress: BookProgress) => new BookProgress({ ...bookProgress }));
+      return parsed.map((book: Book) => new Book({ ...book }));
     } catch (e) {
       console.error(`Error reading or parsing file ${this.filePath}:`, e);
       return [];
