@@ -1,7 +1,7 @@
 import Book from "@/server/entities/Book";
 import IBooksRepository from "../IBooksRepository";
 
-export default class BooksRepository implements IBooksRepository {
+export default class BooksRepositoryInMemory implements IBooksRepository {
   private db: Book[] = [];
 
   constructor() {
