@@ -4,7 +4,7 @@ import path from 'path';
 
 export async function GET() {
   try {
-    ; const booksDir = path.join(process.cwd(), 'public/books');
+    const booksDir = path.join(process.cwd(), 'public/books');
     const bookFiles = await fs.readdir(booksDir);
 
     // Filter for .txt files and remove the .txt extension

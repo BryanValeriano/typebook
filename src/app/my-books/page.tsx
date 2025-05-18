@@ -13,7 +13,7 @@ export default function MyBooksPage() {
   useEffect(() => {
     async function fetchBooks() {
       try {
-        const res = await fetch('/api/users/3/books', { cache: 'no-store' }); // adjust later for real user
+        const res = await fetch('/api/users/books', { cache: 'no-store' }); // adjust later for real user
         const books = await res.json();
         setAvailableBooks(books);
       } catch (err) {
