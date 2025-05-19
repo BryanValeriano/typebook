@@ -4,6 +4,7 @@ type BookConstructor = {
   authorName: string;
   description: string;
   coverImage: string;
+  urlTextSource: string;
 }
 
 export default class Book {
@@ -12,6 +13,7 @@ export default class Book {
   public authorName: string;
   public description: string;
   public coverImage: string;
+  public urlTextSource: string;
 
   constructor(book: BookConstructor) {
     this.id = book.id;
@@ -19,5 +21,6 @@ export default class Book {
     this.authorName = book.authorName;
     this.description = book.description;
     this.coverImage = book.coverImage;
+    this.urlTextSource = book.urlTextSource;
   }
 }

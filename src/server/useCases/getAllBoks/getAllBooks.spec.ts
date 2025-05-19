@@ -13,6 +13,7 @@ function createRandomBook(): Book {
     authorName: `Author ${Math.floor(Math.random() * 1000)}`,
     description: `Description ${Math.floor(Math.random() * 1000)}`,
     coverImage: `https://example.com/image${Math.floor(Math.random() * 1000)}.jpg`,
+    urlTextSource: `https://example.com/book${Math.floor(Math.random() * 1000)}.txt`,
   };
   return book;
 }
