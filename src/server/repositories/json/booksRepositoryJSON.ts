@@ -6,13 +6,14 @@ import fs from "fs/promises";
 export default class BooksRepositoryJSON implements IBooksRepository {
   private db: Book[] = [];
   private filePath = path.join(
+    process.cwd(),
     "src",
     "server",
     "repositories",
     "json",
     "files",
     "books.json",
-  )
+  );
 
   constructor() {
     this.db = [];
@@ -30,6 +31,9 @@ export default class BooksRepositoryJSON implements IBooksRepository {
   }
 
   public async getAllBooks(): Promise<Book[]> {
+    const data = await this.getDataFromFile();
+    this.db = data;
+    console.log("BooksRepositoryJSON: get all books length:", this.db.length);
     return this.db;
   }
 

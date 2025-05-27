@@ -14,6 +14,7 @@ export default class GetAllBooksService {
 
   async execute(): Promise<Book[]> {
     const books = await this.booksRepository.getAllBooks();
+    console.log("GetAllBooksService: execute called, books length:", books.length);
     return books;
   }
 }

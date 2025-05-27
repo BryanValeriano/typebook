@@ -1,0 +1,50 @@
+[
+  {
+    "id": "2c9652e1-6e98-412f-ac15-db33d8cf3e9b",
+    "title": "Brás Cubas",
+    "authorName": "Machado de Assis",
+    "description": "A satirical novel in which the deceased narrator Brás Cubas recounts his life and philosophical musings.",
+    "coverImage": "",
+    "urlTextSource": "public/bras-cubas-machado-de-assis.txt"
+  },
+  {
+    "id": "d613900b-3798-4a31-af86-c9133c7278b6",
+    "title": "Brave New World",
+    "authorName": "Aldous Huxley",
+    "description": "A dystopian novel envisioning a technologically advanced future society driven by conditioning and consumerism.",
+    "coverImage": "",
+    "urlTextSource": "public/brave-new-world-aldous-huxley.txt"
+  },
+  {
+    "id": "91407183-5db5-4e86-afcc-336f40182d72",
+    "title": "David Copperfield",
+    "authorName": "Charles Dickens",
+    "description": "A bildungsroman following the life and adventures of David Copperfield from childhood to maturity.",
+    "coverImage": "",
+    "urlTextSource": "public/david-copperfield-chrles-dickens.txt"
+  },
+  {
+    "id": "08f3cde7-10a3-4bf8-b8be-849acfc226f9",
+    "title": "Livro do Desassossego",
+    "authorName": "Fernando Pessoa",
+    "description": "A fragmentary work blending prose and poetry reflecting the inner thoughts and existential disquiet of its narrator.",
+    "coverImage": "",
+    "urlTextSource": "public/livro-do-desassossego-Fernando-Pessoa.txt"
+  },
+  {
+    "id": "bea5f8fd-ba2d-4e09-9750-a4efe1494b35",
+    "title": "Sample",
+    "authorName": "",
+    "description": "A sample text file for testing and demonstration purposes.",
+    "coverImage": "",
+    "urlTextSource": "public/sample.txt"
+  },
+  {
+    "id": "537284ee-95db-4cd7-88d4-70283d8da9d1",
+    "title": "The Portrait of a Lady",
+    "authorName": "Henry James",
+    "description": "A novel exploring the experiences and moral challenges of Isabel Archer as she navigates society and personal freedom.",
+    "coverImage": "",
+    "urlTextSource": "public/the-portrait-of-a-lady-henry-james.txt"
+  }
+]
