@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import GetAllBooksService from "./getAllBooksService";
 import Book from "@/server/entities/Book";
 import { v4 as uuid } from "uuid";
-import SaveBookService from "../saveBook/saveBook";
+import SaveBookService from "../saveBook/saveBookService";
 
 function createRandomBook(): Book {
   const id = uuid();
