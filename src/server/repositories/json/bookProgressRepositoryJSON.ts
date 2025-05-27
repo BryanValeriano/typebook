@@ -33,7 +33,7 @@ export default class BookProgressRepositoryJSON implements IBookProgressReposito
     await this.saveToFile();
   }
 
-  public async getProgressByUserAndBookIDs(userID: number, bookID: number): Promise<BookProgress | void> {
+  public async getProgressByUserAndBookIDs(userID: string, bookID: string): Promise<BookProgress | void> {
     return this.db.find(bookProgress => bookProgress.userID === userID && bookProgress.bookID === bookID);
   }
 

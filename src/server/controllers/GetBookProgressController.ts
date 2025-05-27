@@ -11,8 +11,8 @@ export default class GetBookProgressController {
   private bookProgressRepository: IBookProgressRepository;
   private getBookProgressService: GetBookProgressService;
   private requestBodySchema = z.object({
-    userID: z.number(),
-    bookID: z.number(),
+    userID: z.string(),
+    bookID: z.string(),
   });
 
   constructor({ bookProgressRepository }: GetBookProgressControllerProps) {
@@ -22,7 +22,7 @@ export default class GetBookProgressController {
     });
   }
 
-  public async handle(userID: number, bookID: number): Promise<BookProgress | void> {
+  public async handle(userID: string, bookID: string): Promise<BookProgress | void> {
     const parsedInput = this.requestBodySchema.safeParse({ userID, bookID });
     if (!parsedInput.success) {
       throw new Error("Invalid input: ", parsedInput.error);

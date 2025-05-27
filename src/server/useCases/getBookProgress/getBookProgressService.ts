@@ -13,7 +13,7 @@ export default class GetBookProgressService {
     this.bookProgressRepository = bookProgressRepository;
   }
 
-  public async execute(userID: number, bookID: number): Promise<BookProgress | void> {
+  public async execute(userID: string, bookID: string): Promise<BookProgress | void> {
     const bookProgress = await this.bookProgressRepository.getProgressByUserAndBookIDs(userID, bookID);
     return bookProgress;
   }

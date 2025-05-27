@@ -1,20 +1,20 @@
 type BookProgressConstructor = {
   id: string;
-  userID: number;
-  bookID: number;
-  currentChunkIndex: number;
-  totalTypedCharacters: number;
-  totalMistakes: number;
+  userID: string;
+  bookID: string;
+  currentChunkIndex: string;
+  totalTypedCharacters: string;
+  totalMistakes: string;
   updatedAt: Date;
 }
 
 export default class BookProgress {
   public id: string;
-  public userID: number;
-  public bookID: number;
-  public currentChunkIndex: number;
-  public totalTypedCharacters: number;
-  public totalMistakes: number;
+  public userID: string;
+  public bookID: string;
+  public currentChunkIndex: string;
+  public totalTypedCharacters: string;
+  public totalMistakes: string;
   public updatedAt: Date;
 
 

@@ -1,9 +1,9 @@
 import { container } from "@/server/container";
 import { describe, expect, it } from "vitest";
-import GetBookByIdService from "./getBookByIdService";
 import SaveBookService from "../saveBook/saveBookService";
 import { v4 as uuid } from "uuid";
 import Book from "@/server/entities/Book";
+import GetBookByIdService from "./getBookByIdService";
 
 function createRandomBook(): Book {
   const id = uuid();
@@ -22,7 +22,7 @@ describe("Get Book By ID", () => {
   it("Should be able to get book by ID", async () => {
     const { booksRepository } = container();
     const getBookByIdService = new GetBookByIdService({
-      bookRepository: booksRepository,
+      booksRepository: booksRepository,
     });
     const saveBookService = new SaveBookService({
       booksRepository,

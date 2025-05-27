@@ -12,7 +12,7 @@ export default class BookProgressRepositoryInMemory implements IBookProgressRepo
     this.db.push(bookProgress);
   }
 
-  public async getProgressByUserAndBookIDs(userID: number, bookID: number): Promise<BookProgress | void> {
+  public async getProgressByUserAndBookIDs(userID: string, bookID: string): Promise<BookProgress | void> {
     return this.db.find(bookProgress => bookProgress.userID === userID && bookProgress.bookID === bookID);
   }
 }
