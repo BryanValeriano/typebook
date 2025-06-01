@@ -12,12 +12,12 @@ export async function GET(request: NextRequest, { params }: { params: { bookId: 
     if (!userID) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
+    const bookId = params.bookId;
+    if (!bookId) {
+      return NextResponse.json({ error: "Missing bookId in params" }, { status: 400 });
+    }
 
-    const response = await getBookProgressController.handle(
-      parseInt(userID),
-      parseInt(params.bookId),
-    );
-
+    const response = await getBookProgressController.handle(userID, bookId);
     return NextResponse.json({ success: true, response }, { status: 201 });
   } catch (error) {
     console.error(error);

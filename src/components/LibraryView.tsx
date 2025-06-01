@@ -1,42 +1,26 @@
-import React from 'react';
+'use client';
+import Link from 'next/link';
+import Book from '@/server/entities/Book';
 
-interface LibraryViewProps {
-  books: string[];
-  onBookSelect: (book: string) => void;
-  onViewAll: () => void;
-}
+interface Props { books: Book[] }
 
-export default function LibraryView({
-  books,
-  onBookSelect,
-  onViewAll
-}: LibraryViewProps) {
+export default function LibraryView({ books }: Props) {
   return (
-    <div className="bg-black text-white p-8 rounded-lg">
-      <h2 className="text-2xl font-bold mb-6">Book Library</h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        {books.map((book, index) => (
-          <button
-            key={index}
-            onClick={() => onBookSelect(book)}
-            className="bg-gray-800 hover:bg-gray-700 p-4 rounded-lg transition-colors"
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-6">Your Library</h1>
+      <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {books.map((book) => (
+          <Link
+            key={book.id}
+            href={`/typing/${book.id}`}
+            className="block bg-gray-800 hover:bg-gray-700 rounded-lg p-4 transition"
           >
-            {book.replace('.txt', '')}
-          </button>
+            <h3 className="text-xl font-semibold">{book.title}</h3>
+            <p className="text-sm text-gray-400">by {book.authorName}</p>
+          </Link>
         ))}
       </div>
-
-      {books.length >= 5 && (
-        <div className="text-center">
-          <button
-            onClick={onViewAll}
-            className="bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded-lg"
-          >
-            View Full Library
-          </button>
-        </div>
-      )}
     </div>
   );
 }
+

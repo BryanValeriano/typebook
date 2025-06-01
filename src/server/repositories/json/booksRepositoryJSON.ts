@@ -38,6 +38,10 @@ export default class BooksRepositoryJSON implements IBooksRepository {
   }
 
   public async getBookById(bookId: string): Promise<Book | void> {
+    const data = await this.getDataFromFile();
+    this.db = data;
+    console.log("BooksRepositoryJSON: get book by id:", bookId);
+    console.log("BooksRepositoryJSON first book:", this.db[0]);
     return this.db.find(book => book.id === bookId);
   }
 
