@@ -17,9 +17,9 @@ interface TypingAreaProps {
 export default function TypingArea({
   textChunks,
   bookId,
-  initialChunkIndex,
-  totalTypedCharacters,
-  totalMistakes,
+  initialChunkIndex = 0,
+  totalTypedCharacters = 0,
+  totalMistakes = 0,
   onComplete,
 }: TypingAreaProps) {
   const [currentChunkIndex, setCurrentChunkIndex] = useState(initialChunkIndex);
@@ -42,11 +42,6 @@ export default function TypingArea({
       setTargetText(textChunks[currentChunkIndex]);
     }
   }, [textChunks, currentChunkIndex]);
-
-  console.log('total typed characters:', cumulativeCharacters);
-  console.log('Current chunk index:', currentChunkIndex);
-  console.log('initial chunk index', initialChunkIndex);
-  console.log('Current position:', currentPos);
 
   useEffect(() => {
     return () => {
