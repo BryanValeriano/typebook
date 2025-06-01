@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import TypingArea from '@/components/TypingArea';
 import Book from '@/server/entities/Book';
 
-// Splits full text into chunks of roughly `chunkSize` words
 function chunkText(fullText: string, chunkSize = 100): string[] {
   return fullText
     .split(/\s+/)
@@ -21,7 +20,7 @@ function chunkText(fullText: string, chunkSize = 100): string[] {
 interface Progress {
   currentChunkIndex: number;
   totalMistakes: number;
-  totalCharacters: number;
+  totalTypedCharacters: number;
 }
 
 export default function TypingPage() {
@@ -33,57 +32,84 @@ export default function TypingPage() {
   const [progress, setProgress] = useState<Progress>({
     currentChunkIndex: 0,
     totalMistakes: 0,
-    totalCharacters: 0,
+    totalTypedCharacters: 0,
   });
+  const [progressLoaded, setProgressLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  async function loadBookMetadata(bookId: string): Promise<Book> {
+    const res = await fetch(`/api/books/${bookId}`, { cache: 'no-store' });
+    if (!res.ok) {
+      throw new Error(`Metadata fetch failed (${res.status})`);
+    }
+    const json = await res.json();
+    return json.response as Book;
+  }
+
+  async function loadTextChunks(urlTextSource: string): Promise<string[]> {
+    const textUrl = urlTextSource.startsWith('/') ? urlTextSource : `/${urlTextSource}`;
+    const res = await fetch(textUrl, { cache: 'no-store' });
+    if (!res.ok) {
+      throw new Error(`Text fetch failed (${res.status})`);
+    }
+    const fullText = await res.text();
+    return chunkText(fullText);
+  }
+
+  async function loadProgress(bookId: string): Promise<Progress> {
+    const res = await fetch(`/api/progress/${bookId}`, { cache: 'no-store' });
+
+    if (res.status === 404) {
+      return {
+        currentChunkIndex: 0,
+        totalMistakes: 0,
+        totalTypedCharacters: 0,
+      };
+    }
+    if (!res.ok) {
+      throw new Error(`Progress fetch failed (${res.status})`);
+    }
+
+    const json = await res.json();
+    const raw = json.response as {
+      currentChunkIndex: string;
+      totalTypedCharacters: string;
+      totalMistakes: string;
+    };
+
+    return {
+      currentChunkIndex: Number(raw.currentChunkIndex) || 0,
+      totalMistakes: Number(raw.totalMistakes) || 0,
+      totalTypedCharacters: Number(raw.totalTypedCharacters) || 0,
+    };
+  }
+
   useEffect(() => {
-    async function loadAll() {
+    async function initialize() {
       try {
-        // 1. Fetch metadata
-        const metaRes = await fetch(`/api/books/${bookId}`, { cache: 'no-store' });
-        if (!metaRes.ok) throw new Error(`Metadata fetch failed (${metaRes.status})`);
-        const response = await metaRes.json();
-        const bookData = response.response as Book;
+        const bookData = await loadBookMetadata(bookId);
         setBook(bookData);
 
-        console.log('Book metadata:', bookData);
+        const textChunks = await loadTextChunks(bookData.urlTextSource);
+        setChunks(textChunks);
 
-        // 2. Fetch raw text
-        const textUrl = bookData.urlTextSource.startsWith('/')
-          ? bookData.urlTextSource
-          : `/${bookData.urlTextSource}`;
-        const textRes = await fetch(textUrl, { cache: 'no-store' });
-        if (!textRes.ok) throw new Error(`Text fetch failed (${textRes.status})`);
-        const fullText = await textRes.text();
-        setChunks(chunkText(fullText));
-
-        // 3. Fetch progress
-        // const progRes = await fetch(`/api/progress/${bookId}`, { cache: 'no-store' });
-        // if (!progRes.ok) throw new Error(`Progress fetch failed (${progRes.status})`);
-        //const { progress: prog } = await progRes.json();
-        const prog = {
-          currentChunkIndex: 0,
-          totalMistakes: 0,
-          totalCharacters: 0,
-        }; // Placeholder
-        setProgress(prog);
+        const loadedProgress = await loadProgress(bookId);
+        setProgress(loadedProgress);
+        setProgressLoaded(true);
       } catch (e: any) {
         console.error('Error loading book data:', e);
         setError(e.message);
       }
     }
 
-    loadAll();
+    initialize();
   }, [bookId]);
 
-  // Error state
   if (error) {
     return <div className="p-4 text-red-500">Error: {error}</div>;
   }
 
-  // Loading state
-  if (!book || !chunks) {
+  if (!book || !chunks || !progressLoaded) {
     return <div className="p-4">Loading...</div>;
   }
 
@@ -94,12 +120,13 @@ export default function TypingPage() {
         <p className="text-gray-600">by {book.authorName}</p>
         {book.description && <p className="mt-2">{book.description}</p>}
       </header>
+
       <TypingArea
         bookId={bookId}
         textChunks={chunks}
         initialChunkIndex={progress.currentChunkIndex}
         totalMistakes={progress.totalMistakes}
-        totalCharacters={progress.totalCharacters}
+        totalTypedCharacters={progress.totalTypedCharacters}
       />
     </div>
   );

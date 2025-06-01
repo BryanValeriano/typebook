@@ -18,6 +18,10 @@ export async function GET(request: NextRequest, { params }: { params: { bookId: 
     }
 
     const response = await getBookProgressController.handle(userID, bookId);
+    console.log("Response from getBookProgressController:", response);
+    if (response === undefined) {
+      return NextResponse.json({ success: false, error: "No progress found for this book" }, { status: 404 });
+    }
     return NextResponse.json({ success: true, response }, { status: 201 });
   } catch (error) {
     console.error(error);
@@ -31,17 +35,20 @@ export async function PATCH(request: NextRequest, context: { params: { bookId: s
     const saveBookProgressController = new SaveBookProgressController({ bookProgressRepository });
 
     const body = await request.json();
-    const bookID = parseInt(context.params.bookId);
+    const bookID = context.params.bookId;
+    if (!bookID) {
+      return NextResponse.json({ error: "Missing bookId in params" }, { status: 400 });
+    }
 
     const userID = request.headers.get("x-user-id");
     if (!userID) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
-    body.userID = parseInt(userID);
 
     const response = await saveBookProgressController.handle({
-      ...body,
+      userID: userID,
       bookID: bookID,
+      ...body,
     });
 
     return NextResponse.json({ success: true, response }, { status: 201 });

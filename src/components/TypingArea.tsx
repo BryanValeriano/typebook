@@ -9,7 +9,7 @@ interface TypingAreaProps {
   textChunks: string[];
   bookId: string;
   initialChunkIndex?: number;
-  totalCharacters?: number;
+  totalTypedCharacters?: number;
   totalMistakes?: number;
   onComplete?: () => void;
 }
@@ -17,9 +17,9 @@ interface TypingAreaProps {
 export default function TypingArea({
   textChunks,
   bookId,
-  initialChunkIndex = 0,
-  totalCharacters = 0,
-  totalMistakes = 0,
+  initialChunkIndex,
+  totalTypedCharacters,
+  totalMistakes,
   onComplete,
 }: TypingAreaProps) {
   const [currentChunkIndex, setCurrentChunkIndex] = useState(initialChunkIndex);
@@ -31,7 +31,7 @@ export default function TypingArea({
   const [isFocused, setIsFocused] = useState(true);
   const [cursorFlash, setCursorFlash] = useState(false);
 
-  const [cumulativeCharacters, setCumulativeCharacters] = useState(totalCharacters);
+  const [cumulativeCharacters, setCumulativeCharacters] = useState(totalTypedCharacters);
   const [cumulativeMistakes, setCumulativeMistakes] = useState(totalMistakes);
 
   const hiddenTextareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -42,6 +42,11 @@ export default function TypingArea({
       setTargetText(textChunks[currentChunkIndex]);
     }
   }, [textChunks, currentChunkIndex]);
+
+  console.log('total typed characters:', cumulativeCharacters);
+  console.log('Current chunk index:', currentChunkIndex);
+  console.log('initial chunk index', initialChunkIndex);
+  console.log('Current position:', currentPos);
 
   useEffect(() => {
     return () => {
@@ -93,9 +98,9 @@ export default function TypingArea({
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                currentChunkIndex: nextChunkIndex,
-                totalCharacters: updatedCharacters,
-                totalMistakes: updatedMistakes,
+                currentChunkIndex: nextChunkIndex.toString(),
+                totalTypedCharacters: updatedCharacters.toString(),
+                totalMistakes: updatedMistakes.toString(),
               }),
             });
           } else {
@@ -127,8 +132,6 @@ export default function TypingArea({
       )}
 
       <div className="flex flex-col gap-8 items-center">
-        <h1 className="text-2xl font-bold mb-8">Typing Speed Test</h1>
-
         <ProgressBar overallProgress={overallProgress} />
 
         <TypingText

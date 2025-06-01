@@ -12,11 +12,11 @@ export default class SaveBookProgressController {
   private bookProgressRepository: IBookProgressRepository;
   private saveBookProgressService: SaveBookProgressService;
   private requestBodySchema = z.object({
-    userID: z.number(),
-    bookID: z.number(),
-    currentChunkIndex: z.number(),
-    totalTypedCharacters: z.number(),
-    totalMistakes: z.number(),
+    userID: z.string(),
+    bookID: z.string(),
+    currentChunkIndex: z.string(),
+    totalTypedCharacters: z.string(),
+    totalMistakes: z.string(),
   })
 
   constructor({ bookProgressRepository }: SaveBookProgressControllerProps) {
@@ -29,6 +29,7 @@ export default class SaveBookProgressController {
   public async handle(input: Input): Promise<BookProgress | void> {
     const parsedInput = this.requestBodySchema.safeParse(input);
     if (!parsedInput.success) {
+      console.error("Invalid input:", input);
       throw new Error("Invalid input: ", parsedInput.error);
     }
     const BookProgressInput = parsedInput.data;
